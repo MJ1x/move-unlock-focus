@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Play, Pause, RotateCcw, Camera, CheckCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Play, Pause, RotateCcw, Camera, CheckCircle, Coins, Settings } from "lucide-react";
 
 interface Exercise {
   id: string;
   name: string;
   icon: string;
-  targetReps: number;
-  timePerRep: number;
   description: string;
 }
 
@@ -23,24 +21,18 @@ const exercises: Exercise[] = [
     id: "pushups",
     name: "Push-ups",
     icon: "💪",
-    targetReps: 15,
-    timePerRep: 2,
     description: "Keep your body straight and push up from the ground"
   },
   {
     id: "squats", 
     name: "Squats",
     icon: "🦵",
-    targetReps: 20,
-    timePerRep: 1.5,
     description: "Squat down and stand back up, keeping your back straight"
   },
   {
     id: "jumping",
     name: "Jumping Jacks",
     icon: "🤸",
-    targetReps: 25,
-    timePerRep: 1,
     description: "Jump with arms and legs apart, then back together"
   }
 ];
@@ -48,16 +40,19 @@ const exercises: Exercise[] = [
 export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenProps) {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [currentReps, setCurrentReps] = useState(0);
+  const [totalTimeEarned, setTotalTimeEarned] = useState(0);
+  const [minutesPerRep, setMinutesPerRep] = useState(2);
   const [isActive, setIsActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showRepFeedback, setShowRepFeedback] = useState(false);
 
   const handleStartExercise = (exercise: Exercise) => {
     setSelectedExercise(exercise);
     setCurrentReps(0);
+    setTotalTimeEarned(0);
     setIsActive(false);
     setCameraActive(false);
-    setShowSuccess(false);
+    setShowRepFeedback(false);
   };
 
   const handleStartCamera = () => {
@@ -66,61 +61,30 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   };
 
   const handleRep = () => {
-    if (selectedExercise && currentReps < selectedExercise.targetReps) {
+    if (selectedExercise) {
       const newReps = currentReps + 1;
-      setCurrentReps(newReps);
+      const newTimeEarned = totalTimeEarned + minutesPerRep;
       
-      if (newReps >= selectedExercise.targetReps) {
-        setIsActive(false);
-        setCameraActive(false);
-        setShowSuccess(true);
-        
-        // Calculate time earned: each rep gives 2 minutes
-        const timeEarned = newReps * selectedExercise.timePerRep;
-        setTimeout(() => {
-          onComplete(timeEarned);
-        }, 2000);
-      }
+      setCurrentReps(newReps);
+      setTotalTimeEarned(newTimeEarned);
+      
+      // Show immediate feedback
+      setShowRepFeedback(true);
+      setTimeout(() => setShowRepFeedback(false), 1000);
+      
+      // Instantly give the time earned to parent
+      onComplete(newTimeEarned);
     }
   };
 
   const resetExercise = () => {
     setCurrentReps(0);
+    setTotalTimeEarned(0);
     setIsActive(false);
     setCameraActive(false);
-    setShowSuccess(false);
+    setShowRepFeedback(false);
   };
 
-  const progress = selectedExercise ? (currentReps / selectedExercise.targetReps) * 100 : 0;
-
-  if (showSuccess) {
-    const timeEarned = selectedExercise!.targetReps * selectedExercise!.timePerRep;
-    return (
-      <div className="min-h-screen bg-gradient-success flex items-center justify-center p-6">
-        <Card className="w-full max-w-md p-8 text-center bg-white/95">
-          <div className="space-y-6">
-            <div className="w-20 h-20 mx-auto bg-gradient-success rounded-full flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-success-foreground" />
-            </div>
-            
-            <div>
-              <h1 className="text-2xl font-bold text-success">Exercise Complete!</h1>
-              <p className="text-muted-foreground mt-2">Great job on those {selectedExercise?.name}!</p>
-            </div>
-
-            <div className="bg-success/10 rounded-lg p-4">
-              <h2 className="text-3xl font-bold text-success">{Math.round(timeEarned)} minutes</h2>
-              <p className="text-sm text-muted-foreground">Screen time earned</p>
-            </div>
-
-            <Button variant="success" onClick={() => onComplete(timeEarned)} className="w-full">
-              Unlock Apps
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   if (selectedExercise) {
     return (
@@ -140,20 +104,51 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
             </div>
           </div>
 
-          {/* Progress */}
-          <Card className="p-6 mb-6">
+          {/* Earnings Rate Setting */}
+          <Card className="p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Earning Rate</span>
+              </div>
+              <Select value={minutesPerRep.toString()} onValueChange={(value) => setMinutesPerRep(Number(value))}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 min/rep</SelectItem>
+                  <SelectItem value="2">2 min/rep</SelectItem>
+                  <SelectItem value="3">3 min/rep</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </Card>
+
+          {/* Time Earned Display */}
+          <Card className="p-6 mb-6 relative overflow-hidden">
+            {showRepFeedback && (
+              <div className="absolute inset-0 bg-success/20 flex items-center justify-center z-10 animate-pulse">
+                <div className="text-center">
+                  <Coins className="w-8 h-8 text-success mx-auto mb-1" />
+                  <p className="text-sm font-bold text-success">+{minutesPerRep} minutes!</p>
+                </div>
+              </div>
+            )}
             <div className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary">
-                  {currentReps} / {selectedExercise.targetReps}
+                <div className="text-4xl font-bold text-success">
+                  {totalTimeEarned}
                 </div>
-                <p className="text-sm text-muted-foreground">Repetitions</p>
+                <p className="text-sm text-muted-foreground">Minutes Earned</p>
               </div>
               
-              <Progress value={progress} className="h-3" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Reps completed:</span>
+                <span className="font-medium">{currentReps}</span>
+              </div>
               
               <div className="text-center text-sm text-muted-foreground">
-                Earn {selectedExercise.timePerRep} min per rep
+                Earning {minutesPerRep} minutes per rep
               </div>
             </div>
           </Card>
@@ -209,10 +204,9 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                   variant="energy" 
                   size="lg"
                   onClick={handleRep}
-                  disabled={currentReps >= selectedExercise.targetReps}
                   className="w-full"
                 >
-                  Count Rep (+{selectedExercise.timePerRep} min)
+                  Count Rep (+{minutesPerRep} min)
                 </Button>
               </div>
             </Card>
@@ -232,7 +226,7 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Choose Exercise</h1>
-            <p className="text-sm text-muted-foreground">Complete exercises to earn screen time</p>
+            <p className="text-sm text-muted-foreground">Start exercising to earn screen time instantly</p>
           </div>
         </div>
 
@@ -249,10 +243,9 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{exercise.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{exercise.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>{exercise.targetReps} reps</span>
-                    <span>•</span>
-                    <span>Earn {exercise.targetReps * exercise.timePerRep} min</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Coins className="w-3 h-3" />
+                    <span>Earn instantly per rep</span>
                   </div>
                 </div>
               </div>
@@ -264,7 +257,7 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           <div className="text-center">
             <p className="text-sm font-medium text-primary">💡 Pro Tip</p>
             <p className="text-xs text-muted-foreground mt-1">
-              The camera uses AI to verify your form and count reps automatically
+              Every rep earns you screen time instantly - no need to finish challenges!
             </p>
           </div>
         </Card>
