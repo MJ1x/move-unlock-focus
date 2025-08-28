@@ -24,9 +24,8 @@ const Index = () => {
     setCurrentScreen("exercise");
   };
 
-  const handleExerciseComplete = (timeEarned: number) => {
-    setEarnedTime(prev => prev + timeEarned);
-    setCurrentScreen("dashboard");
+  const handleRepComplete = (totalTimeEarned: number) => {
+    setEarnedTime(totalTimeEarned);
   };
 
   const handleBackFromApps = () => {
@@ -53,7 +52,7 @@ const Index = () => {
       return (
         <ExerciseScreen 
           onBack={handleBackFromExercise}
-          onComplete={handleExerciseComplete}
+          onComplete={handleRepComplete}
         />
       );
     
