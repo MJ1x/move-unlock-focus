@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Play, Pause, RotateCcw, Camera, CheckCircle } from "lucide-react";
-import { useCamera } from "@/hooks/useCamera";
-import { ExerciseDetector, PoseResults } from "@/utils/poseDetection";
 
 interface Exercise {
   id: string;
@@ -53,10 +51,6 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   const [isActive, setIsActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [poseResults, setPoseResults] = useState<PoseResults | null>(null);
-  
-  const { videoRef, isStreaming, error, startCamera, stopCamera } = useCamera();
-  const detectorRef = useRef<ExerciseDetector | null>(null);
 
   const handleStartExercise = (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -66,29 +60,9 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
     setShowSuccess(false);
   };
 
-  const handleStartCamera = async () => {
+  const handleStartCamera = () => {
     setCameraActive(true);
     setIsActive(true);
-    await startCamera();
-    
-    // Initialize pose detection after camera starts
-    if (videoRef.current && selectedExercise) {
-      const exerciseType = selectedExercise.id as 'pushups' | 'squats' | 'jumping';
-      detectorRef.current = new ExerciseDetector(
-        videoRef.current,
-        (results) => setPoseResults(results),
-        exerciseType
-      );
-      
-      detectorRef.current.setOnRepDetected(() => {
-        handleRep();
-      });
-      
-      // Start detection after a small delay to ensure video is ready
-      setTimeout(() => {
-        detectorRef.current?.start();
-      }, 1000);
-    }
   };
 
   const handleRep = () => {
@@ -115,18 +89,7 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
     setIsActive(false);
     setCameraActive(false);
     setShowSuccess(false);
-    stopCamera();
-    detectorRef.current?.stop();
-    detectorRef.current?.resetCount();
   };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopCamera();
-      detectorRef.current?.stop();
-    };
-  }, [stopCamera]);
 
   const progress = selectedExercise ? (currentReps / selectedExercise.targetReps) * 100 : 0;
 
@@ -199,21 +162,13 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           <Card className="p-6 mb-6">
             <div className="space-y-4">
               <div className="aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
-                {cameraActive && isStreaming ? (
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover rounded-lg"
-                    autoPlay
-                    playsInline
-                    muted
-                  />
-                ) : cameraActive ? (
+                {cameraActive ? (
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center">
                     <div className="text-center">
                       <Camera className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="text-sm">Starting Camera...</p>
+                      <p className="text-sm">Camera Active - AI Counting Reps</p>
                       <div className="mt-4 flex justify-center">
-                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                       </div>
                     </div>
                   </div>
@@ -221,16 +176,6 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                   <div className="text-center">
                     <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Camera will verify your reps</p>
-                    {error && (
-                      <p className="text-xs text-destructive mt-2">{error}</p>
-                    )}
-                  </div>
-                )}
-                
-                {/* Pose detection overlay */}
-                {isStreaming && poseResults?.landmarks && (
-                  <div className="absolute top-2 right-2 bg-success/90 text-success-foreground px-2 py-1 rounded text-xs">
-                    AI Tracking Active
                   </div>
                 )}
               </div>
@@ -242,14 +187,9 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                     Start Exercise
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => {
-                    setIsActive(false); 
-                    setCameraActive(false);
-                    stopCamera();
-                    detectorRef.current?.stop();
-                  }} className="flex-1">
+                  <Button variant="secondary" onClick={() => {setIsActive(false); setCameraActive(false);}} className="flex-1">
                     <Pause className="w-4 h-4 mr-2" />
-                    Stop
+                    Pause
                   </Button>
                 )}
                 
@@ -260,29 +200,19 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
             </div>
           </Card>
 
-          {/* AI Detection Status */}
+          {/* Manual Counter (for demo) */}
           {isActive && (
             <Card className="p-4">
               <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${isStreaming && poseResults?.landmarks ? 'bg-success animate-pulse' : 'bg-muted'}`} />
-                  <p className="text-sm text-muted-foreground">
-                    {isStreaming && poseResults?.landmarks 
-                      ? 'AI is tracking your movements' 
-                      : 'Position yourself in camera view'
-                    }
-                  </p>
-                </div>
-                
-                {/* Fallback manual counter for testing */}
+                <p className="text-sm text-muted-foreground">Demo: Tap to simulate AI detection</p>
                 <Button 
-                  variant="outline" 
-                  size="sm"
+                  variant="energy" 
+                  size="lg"
                   onClick={handleRep}
                   disabled={currentReps >= selectedExercise.targetReps}
-                  className="text-xs"
+                  className="w-full"
                 >
-                  Manual Count (for testing)
+                  Count Rep (+{selectedExercise.timePerRep} min)
                 </Button>
               </div>
             </Card>
