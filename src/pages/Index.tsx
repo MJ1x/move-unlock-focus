@@ -1,15 +1,40 @@
 import { useState } from "react";
+import LaunchScreen from "@/components/onboarding/LaunchScreen";
+import VideoScreen from "@/components/onboarding/VideoScreen";
+import CommitmentScreen from "@/components/onboarding/CommitmentScreen";
+import PricingScreen from "@/components/onboarding/PricingScreen";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import DashboardScreen from "@/components/DashboardScreen";
 
-type Screen = "welcome" | "app-selection" | "exercise" | "dashboard";
+type Screen = "launch" | "video" | "commitment" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>("welcome");
+  const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [earnedTime, setEarnedTime] = useState(0);
+
+  const handleLaunchContinue = () => {
+    setCurrentScreen("video");
+  };
+
+  const handleVideoContinue = () => {
+    setCurrentScreen("commitment");
+  };
+
+  const handleCommit = () => {
+    setCurrentScreen("pricing");
+  };
+
+  const handleDeleteApp = () => {
+    // In a real app, this would close/uninstall the app
+    alert("Thanks for trying Time Is Limited!");
+  };
+
+  const handleStartTrial = () => {
+    setCurrentScreen("welcome");
+  };
 
   const handleGetStarted = () => {
     setCurrentScreen("app-selection");
@@ -37,6 +62,18 @@ const Index = () => {
   };
 
   switch (currentScreen) {
+    case "launch":
+      return <LaunchScreen onContinue={handleLaunchContinue} />;
+    
+    case "video":
+      return <VideoScreen onContinue={handleVideoContinue} />;
+    
+    case "commitment":
+      return <CommitmentScreen onCommit={handleCommit} onDeleteApp={handleDeleteApp} />;
+    
+    case "pricing":
+      return <PricingScreen onStartTrial={handleStartTrial} />;
+
     case "welcome":
       return <WelcomeScreen onGetStarted={handleGetStarted} />;
     
@@ -66,7 +103,7 @@ const Index = () => {
       );
     
     default:
-      return <WelcomeScreen onGetStarted={handleGetStarted} />;
+      return <LaunchScreen onContinue={handleLaunchContinue} />;
   }
 };
 

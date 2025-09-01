@@ -23,7 +23,7 @@ export default function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
         {/* Title */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-            FitLock
+            Time Is Limited
           </h1>
           <p className="text-xl text-muted-foreground">
             Transform screen time into <span className="text-success font-semibold">fitness time</span>
