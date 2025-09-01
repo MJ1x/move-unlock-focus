@@ -8,7 +8,7 @@ import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import DashboardScreen from "@/components/DashboardScreen";
 
-type Screen = "launch" | "video" | "commitment" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
+type Screen = "launch" | "video" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
@@ -20,23 +20,15 @@ const Index = () => {
   };
 
   const handleVideoContinue = () => {
-    setCurrentScreen("commitment");
+    setCurrentScreen("pricing");
   };
 
   const handleVideoBack = () => {
     setCurrentScreen("launch");
   };
 
-  const handleCommit = () => {
-    setCurrentScreen("pricing");
-  };
-
-  const handleCommitmentBack = () => {
-    setCurrentScreen("video");
-  };
-
   const handlePricingBack = () => {
-    setCurrentScreen("commitment");
+    setCurrentScreen("video");
   };
 
   const handleDeleteApp = () => {
@@ -79,9 +71,6 @@ const Index = () => {
     
     case "video":
       return <VideoScreen onContinue={handleVideoContinue} onBack={handleVideoBack} />;
-    
-    case "commitment":
-      return <CommitmentScreen onCommit={handleCommit} onDeleteApp={handleDeleteApp} onBack={handleCommitmentBack} />;
     
     case "pricing":
       return <PricingScreen onStartTrial={handleStartTrial} onBack={handlePricingBack} />;
