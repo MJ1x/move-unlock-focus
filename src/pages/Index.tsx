@@ -23,8 +23,20 @@ const Index = () => {
     setCurrentScreen("commitment");
   };
 
+  const handleVideoBack = () => {
+    setCurrentScreen("launch");
+  };
+
   const handleCommit = () => {
     setCurrentScreen("pricing");
+  };
+
+  const handleCommitmentBack = () => {
+    setCurrentScreen("video");
+  };
+
+  const handlePricingBack = () => {
+    setCurrentScreen("commitment");
   };
 
   const handleDeleteApp = () => {
@@ -66,13 +78,13 @@ const Index = () => {
       return <LaunchScreen onContinue={handleLaunchContinue} />;
     
     case "video":
-      return <VideoScreen onContinue={handleVideoContinue} />;
+      return <VideoScreen onContinue={handleVideoContinue} onBack={handleVideoBack} />;
     
     case "commitment":
-      return <CommitmentScreen onCommit={handleCommit} onDeleteApp={handleDeleteApp} />;
+      return <CommitmentScreen onCommit={handleCommit} onDeleteApp={handleDeleteApp} onBack={handleCommitmentBack} />;
     
     case "pricing":
-      return <PricingScreen onStartTrial={handleStartTrial} />;
+      return <PricingScreen onStartTrial={handleStartTrial} onBack={handlePricingBack} />;
 
     case "welcome":
       return <WelcomeScreen onGetStarted={handleGetStarted} />;

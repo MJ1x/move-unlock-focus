@@ -2,20 +2,28 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Zap } from "lucide-react";
+import { Sparkles, Zap, ArrowLeft } from "lucide-react";
 
 interface PricingScreenProps {
   onStartTrial: () => void;
+  onBack: () => void;
 }
 
-export default function PricingScreen({ onStartTrial }: PricingScreenProps) {
+export default function PricingScreen({ onStartTrial, onBack }: PricingScreenProps) {
   const [price, setPrice] = useState([9]);
 
   const getPriceValue = () => price[0];
   const getYearlyPrice = () => Math.round(getPriceValue() * 12 * 0.8); // 20% discount for yearly
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
+      {/* Back Arrow */}
+      <button
+        onClick={onBack}
+        className="absolute top-6 left-6 w-10 h-10 rounded-full bg-muted/20 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-300"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
       <div className="w-full max-w-lg space-y-10 text-center">
         {/* Header */}
         <div className="space-y-4">

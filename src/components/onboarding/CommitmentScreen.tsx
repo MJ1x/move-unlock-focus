@@ -1,14 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Crown, X } from "lucide-react";
+import { Crown, X, ArrowLeft } from "lucide-react";
 
 interface CommitmentScreenProps {
   onCommit: () => void;
   onDeleteApp: () => void;
+  onBack: () => void;
 }
 
-export default function CommitmentScreen({ onCommit, onDeleteApp }: CommitmentScreenProps) {
+export default function CommitmentScreen({ onCommit, onDeleteApp, onBack }: CommitmentScreenProps) {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
+      {/* Back Arrow */}
+      <button
+        onClick={onBack}
+        className="absolute top-6 left-6 w-10 h-10 rounded-full bg-muted/20 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-300"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
       <div className="w-full max-w-md space-y-12 text-center">
         {/* Icon */}
         <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-full flex items-center justify-center shadow-2xl shadow-primary/25">
