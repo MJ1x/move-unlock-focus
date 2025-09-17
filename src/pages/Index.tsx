@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LaunchScreen from "@/components/onboarding/LaunchScreen";
 import VideoScreen from "@/components/onboarding/VideoScreen";
+import SignUpScreen from "@/components/onboarding/SignUpScreen";
 import CommitmentScreen from "@/components/onboarding/CommitmentScreen";
 import PricingScreen from "@/components/onboarding/PricingScreen";
 import WelcomeScreen from "@/components/WelcomeScreen";
@@ -8,7 +9,7 @@ import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import DashboardScreen from "@/components/DashboardScreen";
 
-type Screen = "launch" | "video" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
+type Screen = "launch" | "video" | "signup" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
@@ -20,7 +21,15 @@ const Index = () => {
   };
 
   const handleVideoContinue = () => {
+    setCurrentScreen("signup");
+  };
+
+  const handleSignUpContinue = () => {
     setCurrentScreen("pricing");
+  };
+
+  const handleSignUpBack = () => {
+    setCurrentScreen("video");
   };
 
   const handleVideoBack = () => {
@@ -28,7 +37,7 @@ const Index = () => {
   };
 
   const handlePricingBack = () => {
-    setCurrentScreen("video");
+    setCurrentScreen("signup");
   };
 
   const handleDeleteApp = () => {
@@ -71,6 +80,9 @@ const Index = () => {
     
     case "video":
       return <VideoScreen onContinue={handleVideoContinue} onBack={handleVideoBack} />;
+    
+    case "signup":
+      return <SignUpScreen onContinue={handleSignUpContinue} onBack={handleSignUpBack} />;
     
     case "pricing":
       return <PricingScreen onStartTrial={handleStartTrial} onBack={handlePricingBack} />;
