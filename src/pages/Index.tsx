@@ -7,9 +7,9 @@ import PricingScreen from "@/components/onboarding/PricingScreen";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
-import DashboardScreen from "@/components/DashboardScreen";
+import MainAppLayout from "@/components/MainAppLayout";
 
-type Screen = "launch" | "video" | "signup" | "pricing" | "welcome" | "app-selection" | "exercise" | "dashboard";
+type Screen = "launch" | "video" | "signup" | "pricing" | "welcome" | "app-selection" | "exercise" | "main-app";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
@@ -55,7 +55,7 @@ const Index = () => {
 
   const handleAppSelection = (apps: string[]) => {
     setSelectedApps(apps);
-    setCurrentScreen("dashboard");
+    setCurrentScreen("main-app");
   };
 
   const handleStartExercise = () => {
@@ -71,7 +71,7 @@ const Index = () => {
   };
 
   const handleBackFromExercise = () => {
-    setCurrentScreen("dashboard");
+    setCurrentScreen("main-app");
   };
 
   switch (currentScreen) {
@@ -106,12 +106,12 @@ const Index = () => {
         />
       );
     
-    case "dashboard":
+    case "main-app":
       return (
-        <DashboardScreen 
+        <MainAppLayout 
           earnedTime={earnedTime}
-          onStartExercise={handleStartExercise}
           selectedApps={selectedApps}
+          onStartExercise={handleStartExercise}
         />
       );
     
