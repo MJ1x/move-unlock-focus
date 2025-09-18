@@ -4,12 +4,13 @@ import VideoScreen from "@/components/onboarding/VideoScreen";
 import SignUpScreen from "@/components/onboarding/SignUpScreen";
 import CommitmentScreen from "@/components/onboarding/CommitmentScreen";
 import PricingScreen from "@/components/onboarding/PricingScreen";
+import GoalSettingScreen from "@/components/onboarding/GoalSettingScreen";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import MainAppLayout from "@/components/MainAppLayout";
 
-type Screen = "launch" | "video" | "signup" | "pricing" | "welcome" | "app-selection" | "exercise" | "main-app";
+type Screen = "launch" | "video" | "signup" | "pricing" | "goal-setting" | "welcome" | "app-selection" | "exercise" | "main-app";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
@@ -46,7 +47,15 @@ const Index = () => {
   };
 
   const handleStartTrial = () => {
+    setCurrentScreen("goal-setting");
+  };
+
+  const handleGoalSettingContinue = () => {
     setCurrentScreen("welcome");
+  };
+
+  const handleGoalSettingBack = () => {
+    setCurrentScreen("pricing");
   };
 
   const handleGetStarted = () => {
@@ -86,6 +95,9 @@ const Index = () => {
     
     case "pricing":
       return <PricingScreen onStartTrial={handleStartTrial} onBack={handlePricingBack} />;
+
+    case "goal-setting":
+      return <GoalSettingScreen onContinue={handleGoalSettingContinue} onBack={handleGoalSettingBack} />;
 
     case "welcome":
       return <WelcomeScreen onGetStarted={handleGetStarted} />;
