@@ -18,18 +18,21 @@ export type Database = {
         Row: {
           app_bundle_id: string | null
           app_name: string
+          id: string
           is_active: boolean | null
           user_id: string
         }
         Insert: {
           app_bundle_id?: string | null
           app_name: string
+          id: string
           is_active?: boolean | null
           user_id?: string
         }
         Update: {
           app_bundle_id?: string | null
           app_name?: string
+          id?: string
           is_active?: boolean | null
           user_id?: string
         }
@@ -38,20 +41,26 @@ export type Database = {
       exercise_session: {
         Row: {
           exercise_type: string
+          id: string
           reps_completed: number | null
           session_date: string | null
+          time_earned: number
           user_id: string
         }
         Insert: {
           exercise_type: string
+          id: string
           reps_completed?: number | null
           session_date?: string | null
+          time_earned: number
           user_id?: string
         }
         Update: {
           exercise_type?: string
+          id?: string
           reps_completed?: number | null
           session_date?: string | null
+          time_earned?: number
           user_id?: string
         }
         Relationships: []
@@ -59,15 +68,27 @@ export type Database = {
       user_settings: {
         Row: {
           created_at: string
+          daily_screen_time_limit: number | null
           id: number
+          minutes_per_rep: number
+          preffered_exercises: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
+          daily_screen_time_limit?: number | null
           id?: number
+          minutes_per_rep: number
+          preffered_exercises?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
+          daily_screen_time_limit?: number | null
           id?: number
+          minutes_per_rep?: number
+          preffered_exercises?: string | null
+          user_id?: string
         }
         Relationships: []
       }

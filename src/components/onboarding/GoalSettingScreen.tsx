@@ -27,7 +27,17 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
     setIsLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast({
+          title: "Authentication Error",
+          description: "Please try signing in again",
+          variant: "destructive",
+        });
+        return;
+      }
       
       if (!user) {
         toast({
@@ -38,35 +48,62 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
         return;
       }
 
-      const { error } = await supabase
+      // First check if user already has settings, then update or insert
+      const { data: existingSettings } = await supabase
         .from('user_settings')
-        .insert({
-          user_id: user.id,
-          daily_screen_time_limit: getGoalMinutes(),
-          minutes_per_rep: 1 // Default value
-        } as any);
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      let error;
+      
+      if (existingSettings) {
+        // Update existing settings
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update({
+            daily_screen_time_limit: getGoalMinutes(),
+            minutes_per_rep: 1
+          })
+          .eq('user_id', user.id);
+        error = updateError;
+      } else {
+        // Insert new settings
+        const { error: insertError } = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            daily_screen_time_limit: getGoalMinutes(),
+            minutes_per_rep: 1
+          });
+        error = insertError;
+      }
 
       if (error) {
         console.error('Error saving goal:', error);
         toast({
-          title: "Error saving goal",
-          description: "Please try again",
+          title: "Failed to save goal",
+          description: error.message || "Please try again",
           variant: "destructive",
         });
         return;
       }
 
       toast({
-        title: "Goal set successfully",
-        description: `Your daily screen time goal: ${formatTime(getGoalValue())}`,
+        title: "Goal set successfully! 🎯",
+        description: `Your daily screen time limit: ${formatTime(getGoalValue())}`,
       });
 
-      onContinue();
+      // Small delay to show success message before continuing
+      setTimeout(() => {
+        onContinue();
+      }, 1000);
+
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Unexpected error:', error);
       toast({
         title: "Something went wrong",
-        description: "Please try again",
+        description: "Please check your connection and try again",
         variant: "destructive",
       });
     } finally {
