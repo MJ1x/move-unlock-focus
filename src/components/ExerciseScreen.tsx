@@ -45,6 +45,8 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   const [isActive, setIsActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [showRepFeedback, setShowRepFeedback] = useState(false);
+  
+  const MIN_REPS = 5;
 
   const handleStartExercise = (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -63,18 +65,31 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   const handleRep = () => {
     if (selectedExercise) {
       const newReps = currentReps + 1;
-      const newTimeEarned = totalTimeEarned + minutesPerRep;
       
       setCurrentReps(newReps);
-      setTotalTimeEarned(newTimeEarned);
       
       // Show immediate feedback
       setShowRepFeedback(true);
       setTimeout(() => setShowRepFeedback(false), 1000);
       
-      // Instantly give the time earned to parent
-      onComplete(newTimeEarned);
+      // Only calculate time earned after 5 reps, but don't give it yet
+      if (newReps >= MIN_REPS) {
+        const newTimeEarned = newReps * minutesPerRep;
+        setTotalTimeEarned(newTimeEarned);
+      }
     }
+  };
+  
+  const handleFinishWorkout = () => {
+    if (currentReps >= MIN_REPS) {
+      const finalTimeEarned = currentReps * minutesPerRep;
+      onComplete(finalTimeEarned);
+    }
+  };
+  
+  const handleCancelSession = () => {
+    resetExercise();
+    setSelectedExercise(null);
   };
 
   const resetExercise = () => {
@@ -124,31 +139,41 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
             </div>
           </Card>
 
-          {/* Time Earned Display */}
+          {/* Progress Display */}
           <Card className="p-6 mb-6 relative overflow-hidden">
             {showRepFeedback && (
-              <div className="absolute inset-0 bg-success/20 flex items-center justify-center z-10 animate-pulse">
+              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-pulse">
                 <div className="text-center">
-                  <Coins className="w-8 h-8 text-success mx-auto mb-1" />
-                  <p className="text-sm font-bold text-success">+{minutesPerRep} minutes!</p>
+                  <CheckCircle className="w-8 h-8 text-primary mx-auto mb-1" />
+                  <p className="text-sm font-bold text-primary">Rep counted!</p>
                 </div>
               </div>
             )}
             <div className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl font-bold text-success">
-                  {totalTimeEarned}
+                <div className={`text-4xl font-bold ${currentReps >= MIN_REPS ? 'text-success' : 'text-muted-foreground'}`}>
+                  {currentReps >= MIN_REPS ? totalTimeEarned : 0}
                 </div>
-                <p className="text-sm text-muted-foreground">Minutes Earned</p>
+                <p className="text-sm text-muted-foreground">Minutes Will Be Earned</p>
               </div>
               
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Reps completed:</span>
-                <span className="font-medium">{currentReps}</span>
+                <span className="font-medium">
+                  {currentReps}/{MIN_REPS} minimum
+                </span>
               </div>
               
-              <div className="text-center text-sm text-muted-foreground">
-                Earning {minutesPerRep} minutes per rep
+              <div className="text-center">
+                {currentReps < MIN_REPS ? (
+                  <p className="text-sm text-warning">
+                    Complete {MIN_REPS - currentReps} more reps to start earning time
+                  </p>
+                ) : (
+                  <p className="text-sm text-success">
+                    Great! Earning {minutesPerRep} minutes per rep
+                  </p>
+                )}
               </div>
             </div>
           </Card>
@@ -195,7 +220,7 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
             </div>
           </Card>
 
-          {/* Manual Counter (for demo) */}
+          {/* Manual Counter and Actions */}
           {isActive && (
             <Card className="p-4">
               <div className="text-center space-y-4">
@@ -206,8 +231,28 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                   onClick={handleRep}
                   className="w-full"
                 >
-                  Count Rep (+{minutesPerRep} min)
+                  Count Rep {currentReps >= MIN_REPS && `(+${minutesPerRep} min)`}
                 </Button>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancelSession}
+                    className="flex-1"
+                  >
+                    Cancel Session
+                  </Button>
+                  
+                  {currentReps >= MIN_REPS && (
+                    <Button 
+                      variant="success" 
+                      onClick={handleFinishWorkout}
+                      className="flex-1"
+                    >
+                      Finish Workout
+                    </Button>
+                  )}
+                </div>
               </div>
             </Card>
           )}
@@ -257,7 +302,7 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           <div className="text-center">
             <p className="text-sm font-medium text-primary">💡 Pro Tip</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Every rep earns you screen time instantly - no need to finish challenges!
+              Complete at least 5 reps to start earning screen time!
             </p>
           </div>
         </Card>

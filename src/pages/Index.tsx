@@ -73,6 +73,11 @@ const Index = () => {
 
   const handleRepComplete = (totalTimeEarned: number) => {
     setEarnedTime(totalTimeEarned);
+    setCurrentScreen("main-app"); // Return to dashboard after completing exercise
+  };
+  
+  const handleTimeReset = (newTime: number) => {
+    setEarnedTime(newTime);
   };
 
   const handleBackFromApps = () => {
@@ -124,6 +129,7 @@ const Index = () => {
           earnedTime={earnedTime}
           selectedApps={selectedApps}
           onStartExercise={handleStartExercise}
+          onTimeReset={handleTimeReset}
         />
       );
     

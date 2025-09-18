@@ -19,6 +19,7 @@ interface HomeScreenProps {
   earnedTime: number;
   onStartExercise: () => void;
   selectedApps: string[];
+  dailyGoal?: number; // in minutes
 }
 
 interface DailyStats {
@@ -31,7 +32,8 @@ interface DailyStats {
 export default function HomeScreen({ 
   earnedTime, 
   onStartExercise, 
-  selectedApps 
+  selectedApps,
+  dailyGoal = 240 // Default 4 hours 
 }: HomeScreenProps) {
   const [currentTime, setCurrentTime] = useState(earnedTime);
   const [isTimerActive, setIsTimerActive] = useState(false);
@@ -52,6 +54,8 @@ export default function HomeScreen({
         setCurrentTime(prev => {
           if (prev <= 1) {
             setIsTimerActive(false);
+            // When time expires, redirect to exercise challenge
+            onStartExercise();
             return 0;
           }
           return prev - 1;
@@ -60,7 +64,7 @@ export default function HomeScreen({
     }
     
     return () => clearInterval(interval);
-  }, [isTimerActive, currentTime]);
+  }, [isTimerActive, currentTime, onStartExercise]);
 
   const handleStartTimer = () => {
     if (currentTime > 0) {
@@ -94,7 +98,7 @@ export default function HomeScreen({
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2">
               <Timer className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">Available Screen Time</h2>
+              <h2 className="text-lg font-semibold">Screen Time Today</h2>
             </div>
             
             <div className="space-y-3">
@@ -102,27 +106,26 @@ export default function HomeScreen({
                 {formatTime(Math.max(0, currentTime))}
               </div>
               
-              <Progress value={Math.max(0, timeProgress)} className="h-2" />
+              <div className="text-sm text-muted-foreground">
+                Time remaining: {formatTime(Math.max(0, currentTime))} of {formatTime(dailyGoal)} daily goal
+              </div>
               
-              <div className="flex justify-center gap-2">
-                {!isTimerActive ? (
-                  <Button 
-                    variant="default" 
-                    onClick={handleStartTimer}
-                    disabled={currentTime === 0}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Using Apps
-                  </Button>
-                ) : (
+              <Progress value={Math.max(0, (currentTime / dailyGoal) * 100)} className="h-2" />
+              
+              {isTimerActive ? (
+                <div className="flex justify-center">
                   <Button variant="secondary" onClick={handlePauseTimer}>
                     <Clock className="w-4 h-4 mr-2" />
                     Pause Timer
                   </Button>
-                )}
-              </div>
-
-              {currentTime === 0 && (
+                </div>
+              ) : currentTime > 0 ? (
+                <div className="text-center">
+                  <p className="text-sm text-success">
+                    📱 Apps are now accessible! Timer will start automatically when you use them.
+                  </p>
+                </div>
+              ) : (
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-3">
                     No time remaining. Exercise to unlock!

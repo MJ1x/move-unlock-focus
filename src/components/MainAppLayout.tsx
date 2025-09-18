@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Home, 
@@ -12,19 +12,62 @@ import BlockedAppsScreen from "./screens/BlockedAppsScreen";
 import ProgressScreen from "./screens/ProgressScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import { supabase } from "@/integrations/supabase/client";
+import { useDailyReset } from "@/hooks/useDailyReset";
 
 interface MainAppLayoutProps {
   earnedTime: number;
   selectedApps: string[];
   onStartExercise: () => void;
+  onTimeReset?: (newTime: number) => void;
 }
 
 export default function MainAppLayout({ 
   earnedTime, 
   selectedApps, 
-  onStartExercise 
+  onStartExercise,
+  onTimeReset
 }: MainAppLayoutProps) {
   const [activeTab, setActiveTab] = useState("home");
+  const [dailyGoal, setDailyGoal] = useState<number>(240); // Default 4 hours in minutes
+  
+  // Fetch user's daily goal from database
+  useEffect(() => {
+    const fetchDailyGoal = async () => {
+      try {
+        const { data: userSettings, error } = await supabase
+          .from('user_settings')
+          .select('daily_screen_time_limit')
+          .maybeSingle();
+          
+        if (error) {
+          console.log('No user settings found, using default');
+          return;
+        }
+        
+        if (userSettings?.daily_screen_time_limit) {
+          setDailyGoal(userSettings.daily_screen_time_limit);
+        }
+      } catch (error) {
+        console.error('Error fetching daily goal:', error);
+      }
+    };
+    
+    fetchDailyGoal();
+  }, []);
+  
+  // Handle daily reset
+  const handleDailyReset = () => {
+    // Reset available time to daily goal
+    onTimeReset?.(dailyGoal);
+    console.log('Daily reset performed - time reset to daily goal');
+  };
+  
+  // Use daily reset hook
+  const { timeUntilReset } = useDailyReset({
+    dailyGoal,
+    onReset: handleDailyReset
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,6 +79,7 @@ export default function MainAppLayout({
               earnedTime={earnedTime}
               selectedApps={selectedApps}
               onStartExercise={onStartExercise}
+              dailyGoal={dailyGoal}
             />
           </TabsContent>
           
