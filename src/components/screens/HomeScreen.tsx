@@ -127,16 +127,9 @@ export default function HomeScreen({
                 </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-sm text-muted-foreground">
                     No time remaining. Exercise to unlock!
                   </p>
-                  <Button 
-                    onClick={onStartExercise}
-                    className="bg-gradient-energy text-energy-foreground hover:shadow-energy animate-pulse"
-                  >
-                    <Dumbbell className="w-4 h-4 mr-2" />
-                    Start Exercise Challenge
-                  </Button>
                 </div>
               )}
             </div>
@@ -192,11 +185,21 @@ export default function HomeScreen({
           </div>
         </Card>
 
-        {/* Motivational Message */}
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            Keep going! Every rep counts towards a healthier you 💪
-          </p>
+        {/* Quick Actions */}
+        <div className="space-y-3">
+          <Button 
+            onClick={onStartExercise}
+            className="w-full bg-gradient-energy text-energy-foreground hover:shadow-energy"
+          >
+            <Dumbbell className="w-4 h-4 mr-2" />
+            Earn More Time
+          </Button>
+          
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">
+              Keep going! Every rep counts towards a healthier you 💪
+            </p>
+          </div>
         </div>
       </div>
     </div>
