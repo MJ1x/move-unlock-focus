@@ -132,10 +132,10 @@ export default function HomeScreen({
                   </p>
                   <Button 
                     onClick={onStartExercise}
-                    className="bg-gradient-energy text-energy-foreground hover:shadow-energy"
+                    className="bg-gradient-energy text-energy-foreground hover:shadow-energy animate-pulse"
                   >
                     <Dumbbell className="w-4 h-4 mr-2" />
-                    Start Exercise
+                    Start Exercise Challenge
                   </Button>
                 </div>
               )}
@@ -192,21 +192,11 @@ export default function HomeScreen({
           </div>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="space-y-3">
-          <Button 
-            onClick={onStartExercise}
-            className="w-full bg-gradient-energy text-energy-foreground hover:shadow-energy"
-          >
-            <Dumbbell className="w-4 h-4 mr-2" />
-            Earn More Time
-          </Button>
-          
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">
-              Keep going! Every rep counts towards a healthier you 💪
-            </p>
-          </div>
+        {/* Motivational Message */}
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            Keep going! Every rep counts towards a healthier you 💪
+          </p>
         </div>
       </div>
     </div>

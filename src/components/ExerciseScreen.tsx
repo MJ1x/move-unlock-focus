@@ -166,13 +166,15 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
               
               <div className="text-center">
                 {currentReps < MIN_REPS ? (
-                  <p className="text-sm text-warning">
+                  <p className="text-sm text-warning animate-fade-in">
                     Complete {MIN_REPS - currentReps} more reps to start earning time
                   </p>
                 ) : (
-                  <p className="text-sm text-success">
-                    Great! Earning {minutesPerRep} minutes per rep
-                  </p>
+                  <div className="animate-scale-in">
+                    <p className="text-sm text-success font-medium">
+                      🎉 Minimum reached! Earning {minutesPerRep} minutes per rep
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -235,19 +237,19 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                 </Button>
                 
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleCancelSession}
-                    className="flex-1"
-                  >
-                    Cancel Session
-                  </Button>
-                  
-                  {currentReps >= MIN_REPS && (
+                  {currentReps < MIN_REPS ? (
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCancelSession}
+                      className="w-full"
+                    >
+                      Cancel Session
+                    </Button>
+                  ) : (
                     <Button 
                       variant="success" 
                       onClick={handleFinishWorkout}
-                      className="flex-1"
+                      className="w-full animate-scale-in"
                     >
                       Finish Workout
                     </Button>
