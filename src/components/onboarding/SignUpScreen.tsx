@@ -167,6 +167,16 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
           >
             {isLoading ? "Creating account..." : "Create Account"}
           </Button>
+          
+          <Button 
+            type="button"
+            variant="outline"
+            className="w-full py-3"
+            onClick={onContinue}
+            disabled={isLoading}
+          >
+            Skip (Testing)
+          </Button>
         </form>
 
         <p className="text-xs text-muted-foreground">
