@@ -71,8 +71,8 @@ const Index = () => {
     setCurrentScreen("exercise");
   };
 
-  const handleRepComplete = (totalTimeEarned: number) => {
-    setEarnedTime(totalTimeEarned);
+  const handleRepComplete = (timeEarned: number) => {
+    setEarnedTime(prevTime => prevTime + timeEarned); // Add to existing balance
     setCurrentScreen("main-app"); // Return to dashboard after completing exercise
   };
   
