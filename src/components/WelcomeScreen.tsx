@@ -23,10 +23,10 @@ export default function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
         {/* Title */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-            Time Is Limited
+            Perfect!
           </h1>
           <p className="text-xl text-muted-foreground">
-            Transform screen time into <span className="text-success font-semibold">fitness time</span>
+            Your preferences are set. Now let's select which apps to <span className="text-primary font-semibold">time-limit</span>
           </p>
         </div>
 
@@ -76,10 +76,10 @@ export default function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
             onClick={onGetStarted}
             className="w-full"
           >
-            Get Started
+            Choose Apps to Limit
           </Button>
           <p className="text-xs text-muted-foreground">
-            Take control of your digital wellness
+            Only selected apps will use your daily time allowance
           </p>
         </div>
       </div>
