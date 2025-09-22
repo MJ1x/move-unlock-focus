@@ -129,10 +129,10 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
           </div>
           
           <h1 className="text-3xl font-bold text-foreground">
-            Set Your Daily <span className="text-primary">Screen Time</span> Goal
+            Set Your Daily <span className="text-primary">Starting Time</span>
           </h1>
           <p className="text-muted-foreground">
-            Choose your target to start building healthier digital habits
+            How much time do you want to start with each day for distracting apps?
           </p>
         </div>
 
@@ -161,26 +161,25 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
               <Slider
                 value={goalHours}
                 onValueChange={setGoalHours}
-                max={8}
+                max={6}
                 min={1}
                 step={0.5}
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
                 <span>1h</span>
-                <span>8h</span>
+                <span>6h</span>
               </div>
             </div>
           </div>
 
-          {/* Motivational Text */}
-          <div className="bg-success/10 border border-success/20 rounded-xl p-4">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-success" />
-              <span className="text-success font-semibold text-sm">Recommended</span>
-            </div>
-            <p className="text-success/80 text-sm">
-              2-3 hours daily for better focus and mental well-being
+          {/* Explanation */}
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 space-y-2">
+            <p className="text-primary/80 text-sm">
+              You'll get this amount fresh each morning. Exercises will be needed for more screen time.
+            </p>
+            <p className="text-primary/60 text-xs">
+              <strong>Note:</strong> Only selected apps take from your time. Other apps like calls, messages, work apps are never restricted.
             </p>
           </div>
         </div>
@@ -192,7 +191,7 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
           className="w-full py-6 text-xl font-bold bg-gradient-primary hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
           size="lg"
         >
-          {isLoading ? "Setting Goal..." : "Set My Goal"}
+          {isLoading ? "Saving..." : "Next"}
         </Button>
 
         <p className="text-xs text-muted-foreground">

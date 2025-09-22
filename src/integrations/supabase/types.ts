@@ -70,24 +70,30 @@ export type Database = {
           created_at: string
           daily_screen_time_limit: number | null
           id: number
+          minutes_per_exercise_rep: number | null
           minutes_per_rep: number
           preffered_exercises: string | null
+          reminder_frequency_minutes: number | null
           user_id: string
         }
         Insert: {
           created_at?: string
           daily_screen_time_limit?: number | null
           id?: number
+          minutes_per_exercise_rep?: number | null
           minutes_per_rep: number
           preffered_exercises?: string | null
+          reminder_frequency_minutes?: number | null
           user_id: string
         }
         Update: {
           created_at?: string
           daily_screen_time_limit?: number | null
           id?: number
+          minutes_per_exercise_rep?: number | null
           minutes_per_rep?: number
           preffered_exercises?: string | null
+          reminder_frequency_minutes?: number | null
           user_id?: string
         }
         Relationships: []
