@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface GoalSettingScreenProps {
-  onContinue: () => void;
+  onContinue: (dailyLimit: number) => void;
   onBack: () => void;
+  initialValue?: number;
 }
 
-export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScreenProps) {
-  const [goalHours, setGoalHours] = useState([3]);
-  const [isLoading, setIsLoading] = useState(false);
+export default function GoalSettingScreen({ onContinue, onBack, initialValue }: GoalSettingScreenProps) {
+  const [goalHours, setGoalHours] = useState([initialValue ? initialValue / 60 : 3]);
   const { toast } = useToast();
 
   const getGoalValue = () => goalHours[0];
@@ -23,92 +23,8 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
     return `${hours} hours`;
   };
 
-  const handleSetGoal = async () => {
-    setIsLoading(true);
-    
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        toast({
-          title: "Authentication Error",
-          description: "Please try signing in again",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to continue",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // First check if user already has settings, then update or insert
-      const { data: existingSettings } = await supabase
-        .from('user_settings')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      let error;
-      
-      if (existingSettings) {
-        // Update existing settings
-        const { error: updateError } = await supabase
-          .from('user_settings')
-          .update({
-            daily_screen_time_limit: getGoalMinutes(),
-            minutes_per_rep: 1
-          })
-          .eq('user_id', user.id);
-        error = updateError;
-      } else {
-        // Insert new settings
-        const { error: insertError } = await supabase
-          .from('user_settings')
-          .insert({
-            user_id: user.id,
-            daily_screen_time_limit: getGoalMinutes(),
-            minutes_per_rep: 1
-          });
-        error = insertError;
-      }
-
-      if (error) {
-        console.error('Error saving goal:', error);
-        toast({
-          title: "Failed to save goal",
-          description: error.message || "Please try again",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Goal set successfully! 🎯",
-        description: `Your daily screen time limit: ${formatTime(getGoalValue())}`,
-      });
-
-      // Small delay to show success message before continuing
-      setTimeout(() => {
-        onContinue();
-      }, 1000);
-
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast({
-        title: "Something went wrong",
-        description: "Please check your connection and try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleContinue = () => {
+    onContinue(getGoalMinutes());
   };
 
   return (
@@ -186,12 +102,11 @@ export default function GoalSettingScreen({ onContinue, onBack }: GoalSettingScr
 
         {/* CTA */}
         <Button 
-          onClick={handleSetGoal}
-          disabled={isLoading}
+          onClick={handleContinue}
           className="w-full py-6 text-xl font-bold bg-gradient-primary hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
           size="lg"
         >
-          {isLoading ? "Saving..." : "Next"}
+          Next
         </Button>
 
         <p className="text-xs text-muted-foreground">

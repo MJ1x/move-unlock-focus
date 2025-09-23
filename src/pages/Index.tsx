@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LaunchScreen from "@/components/onboarding/LaunchScreen";
 import VideoScreen from "@/components/onboarding/VideoScreen";
 import SignUpScreen from "@/components/onboarding/SignUpScreen";
@@ -11,6 +11,7 @@ import WelcomeScreen from "@/components/WelcomeScreen";
 import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import MainAppLayout from "@/components/MainAppLayout";
+import { useUserSettings } from "@/hooks/useUserSettings";
 
 type Screen = "launch" | "video" | "signup" | "pricing" | "goal-setting" | "reminder-frequency" | "exercise-rewards" | "welcome" | "app-selection" | "exercise" | "main-app";
 
@@ -22,6 +23,19 @@ const Index = () => {
   // Questionnaire state
   const [dailyLimit, setDailyLimit] = useState(180); // 3 hours default
   const [reminderFrequency, setReminderFrequency] = useState(15);
+  const [exerciseReward, setExerciseReward] = useState(1);
+  
+  // Load existing user settings
+  const { settings, loading } = useUserSettings();
+  
+  // Update state when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      setDailyLimit(settings.daily_screen_time_limit || 180);
+      setReminderFrequency(settings.reminder_frequency_minutes || 15);
+      setExerciseReward(settings.minutes_per_exercise_rep || 1);
+    }
+  }, [settings]);
 
   const handleLaunchContinue = () => {
     setCurrentScreen("video");
@@ -56,7 +70,8 @@ const Index = () => {
     setCurrentScreen("goal-setting");
   };
 
-  const handleGoalSettingContinue = () => {
+  const handleGoalSettingContinue = (newDailyLimit: number) => {
+    setDailyLimit(newDailyLimit);
     setCurrentScreen("reminder-frequency");
   };
 
@@ -125,10 +140,18 @@ const Index = () => {
       return <PricingScreen onStartTrial={handleStartTrial} onBack={handlePricingBack} />;
 
     case "goal-setting":
-      return <GoalSettingScreen onContinue={handleGoalSettingContinue} onBack={handleGoalSettingBack} />;
+      return <GoalSettingScreen 
+        onContinue={handleGoalSettingContinue} 
+        onBack={handleGoalSettingBack}
+        initialValue={dailyLimit}
+      />;
 
     case "reminder-frequency":
-      return <ReminderFrequencyScreen onContinue={handleReminderFrequencyContinue} onBack={handleReminderFrequencyBack} />;
+      return <ReminderFrequencyScreen 
+        onContinue={handleReminderFrequencyContinue} 
+        onBack={handleReminderFrequencyBack}
+        initialValue={reminderFrequency}
+      />;
 
     case "exercise-rewards":
       return <ExerciseRewardsScreen 
@@ -136,6 +159,7 @@ const Index = () => {
         onBack={handleExerciseRewardsBack}
         dailyLimit={dailyLimit}
         reminderFrequency={reminderFrequency}
+        initialValue={exerciseReward}
       />;
 
     case "welcome":

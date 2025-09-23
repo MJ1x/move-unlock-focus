@@ -9,15 +9,17 @@ interface ExerciseRewardsScreenProps {
   onBack: () => void;
   dailyLimit: number;
   reminderFrequency: number;
+  initialValue?: number;
 }
 
 export default function ExerciseRewardsScreen({ 
   onContinue, 
   onBack, 
   dailyLimit, 
-  reminderFrequency 
+  reminderFrequency,
+  initialValue 
 }: ExerciseRewardsScreenProps) {
-  const [selectedReward, setSelectedReward] = useState(1);
+  const [selectedReward, setSelectedReward] = useState(initialValue || 1);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -56,8 +58,7 @@ export default function ExerciseRewardsScreen({
           user_id: user.id,
           daily_screen_time_limit: dailyLimit,
           reminder_frequency_minutes: reminderFrequency,
-          minutes_per_exercise_rep: selectedReward,
-          minutes_per_rep: selectedReward // Keep old column for compatibility
+          minutes_per_exercise_rep: selectedReward
         });
 
       if (error) {

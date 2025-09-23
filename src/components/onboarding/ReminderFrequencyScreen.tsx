@@ -5,10 +5,11 @@ import { ArrowLeft, Bell, Clock } from "lucide-react";
 interface ReminderFrequencyScreenProps {
   onContinue: (frequency: number) => void;
   onBack: () => void;
+  initialValue?: number;
 }
 
-export default function ReminderFrequencyScreen({ onContinue, onBack }: ReminderFrequencyScreenProps) {
-  const [selectedFrequency, setSelectedFrequency] = useState(15);
+export default function ReminderFrequencyScreen({ onContinue, onBack, initialValue }: ReminderFrequencyScreenProps) {
+  const [selectedFrequency, setSelectedFrequency] = useState(initialValue || 15);
 
   const frequencyOptions = [
     { value: 5, label: "5 minutes", description: "Frequent check-ins" },
