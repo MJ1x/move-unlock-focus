@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Play, Pause, RotateCcw, Camera, CheckCircle, Coins, Settings } from "lucide-react";
+import PushUpTrainer, { PushUpStage } from "./PushUpTrainer";
 
 interface Exercise {
   id: string;
@@ -45,6 +46,9 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   const [isActive, setIsActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [showRepFeedback, setShowRepFeedback] = useState(false);
+  const [aiStatusMessage, setAiStatusMessage] = useState("Tap Start Exercise to let the AI line up your form.");
+  const [aiConfidence, setAiConfidence] = useState(0);
+  const [aiStage, setAiStage] = useState<PushUpStage>("ready");
   
   const MIN_REPS = 5;
 
@@ -55,11 +59,23 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
     setIsActive(false);
     setCameraActive(false);
     setShowRepFeedback(false);
+    setAiConfidence(0);
+    setAiStage("ready");
+    setAiStatusMessage(
+      exercise.id === "pushups"
+        ? "Tap Start Exercise to allow camera access and show your full body."
+        : "Tap Start Exercise when you're ready to begin."
+    );
   };
 
   const handleStartCamera = () => {
     setCameraActive(true);
     setIsActive(true);
+    if (selectedExercise?.id === "pushups") {
+      setAiConfidence(0);
+      setAiStage("ready");
+      setAiStatusMessage("Initializing camera... step back so your whole body is visible.");
+    }
   };
 
   const handleRep = () => {
@@ -98,7 +114,12 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
     setIsActive(false);
     setCameraActive(false);
     setShowRepFeedback(false);
+    setAiConfidence(0);
+    setAiStage("ready");
+    setAiStatusMessage("Tap Start Exercise to let the AI line up your form.");
   };
+
+  const isPushUp = selectedExercise?.id === "pushups";
 
 
   if (selectedExercise) {
@@ -184,7 +205,23 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           <Card className="p-6 mb-6">
             <div className="space-y-4">
               <div className="aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
-                {cameraActive ? (
+                {isPushUp ? (
+                  cameraActive && isActive ? (
+                    <PushUpTrainer
+                      isActive={cameraActive && isActive}
+                      onRepDetected={handleRep}
+                      onStatusUpdate={setAiStatusMessage}
+                      onConfidenceUpdate={setAiConfidence}
+                      onStageChange={setAiStage}
+                    />
+                  ) : (
+                    <div className="text-center px-6 text-sm text-muted-foreground">
+                      <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="font-medium text-foreground">Camera ready for AI coaching</p>
+                      <p>Press Start Exercise and position yourself sideways so your full body is visible.</p>
+                    </div>
+                  )
+                ) : cameraActive ? (
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center">
                     <div className="text-center">
                       <Camera className="w-12 h-12 text-primary mx-auto mb-2" />
@@ -201,6 +238,21 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                   </div>
                 )}
               </div>
+
+              {isPushUp && (
+                <div className="rounded-lg bg-muted/60 p-3 text-sm space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-foreground">AI Status</span>
+                    <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {aiStage === "ready" ? "Ready" : aiStage === "lowering" ? "Lowering" : "Press"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{aiStatusMessage}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Pose confidence: <span className="font-medium text-foreground">{Math.round(aiConfidence * 100)}%</span>
+                  </p>
+                </div>
+              )}
               
               <div className="flex gap-2">
                 {!isActive ? (
@@ -209,7 +261,17 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
                     Start Exercise
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => {setIsActive(false); setCameraActive(false);}} className="flex-1">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setIsActive(false);
+                      setCameraActive(false);
+                      setAiConfidence(0);
+                      setAiStage("ready");
+                      setAiStatusMessage("Workout paused. Press Start to resume the AI camera.");
+                    }}
+                    className="flex-1"
+                  >
                     <Pause className="w-4 h-4 mr-2" />
                     Pause
                   </Button>
@@ -226,20 +288,28 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
           {isActive && (
             <Card className="p-4">
               <div className="text-center space-y-4">
-                <p className="text-sm text-muted-foreground">Demo: Tap to simulate AI detection</p>
-                <Button 
-                  variant="energy" 
-                  size="lg"
-                  onClick={handleRep}
-                  className="w-full"
-                >
-                  Count Rep {currentReps >= MIN_REPS && `(+${minutesPerRep} min)`}
-                </Button>
-                
+                {isPushUp ? (
+                  <p className="text-sm text-muted-foreground">
+                    The AI camera will track your joints and count a rep every time you return to the top position.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">Demo: Tap to simulate AI detection</p>
+                    <Button
+                      variant="energy"
+                      size="lg"
+                      onClick={handleRep}
+                      className="w-full"
+                    >
+                      Count Rep {currentReps >= MIN_REPS && `(+${minutesPerRep} min)`}
+                    </Button>
+                  </>
+                )}
+
                 <div className="flex gap-2">
                   {currentReps < MIN_REPS ? (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={handleCancelSession}
                       className="w-full"
                     >
