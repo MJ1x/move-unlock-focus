@@ -5,6 +5,21 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Crown, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Strong validation schema for security
+const signUpSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "Please enter a valid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+  password: z.string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(72, { message: "Password must be less than 72 characters" })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" })
+});
 
 interface SignUpScreenProps {
   onContinue: () => void;
@@ -20,19 +35,18 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    
+    // Validate inputs using zod schema
+    const validation = signUpSchema.safeParse({ 
+      email: email.trim(), 
+      password 
+    });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
+        title: "Invalid Input",
+        description: firstError.message,
         variant: "destructive"
       });
       return;
@@ -42,10 +56,11 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
     
     try {
       const redirectUrl = `${window.location.origin}/`;
+      const validData = validation.data;
       
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validData.email,
+        password: validData.password,
         options: {
           emailRedirectTo: redirectUrl
         }
@@ -70,7 +85,6 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
-        // Continue to pricing after successful signup
         onContinue();
       }
     } catch (error) {
@@ -138,7 +152,7 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters (A-Z, a-z, 0-9)"
                   className="h-12 text-base pr-12"
                   disabled={isLoading}
                   required

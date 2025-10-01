@@ -105,6 +105,7 @@ export type Database = {
           total_reps_completed: number
           total_time_earned: number
           trial_end_date: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -115,6 +116,7 @@ export type Database = {
           total_reps_completed?: number
           total_time_earned?: number
           trial_end_date?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -125,6 +127,7 @@ export type Database = {
           total_reps_completed?: number
           total_time_earned?: number
           trial_end_date?: string | null
+          user_id?: string
         }
         Relationships: []
       }
