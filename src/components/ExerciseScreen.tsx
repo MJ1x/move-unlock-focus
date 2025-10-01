@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Play, Pause, RotateCcw, Camera, CheckCircle, Coins, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useUserSettings } from "@/hooks/useUserSettings";
 
 interface Exercise {
   id: string;
@@ -45,8 +48,17 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   const [isActive, setIsActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [showRepFeedback, setShowRepFeedback] = useState(false);
+  const { toast } = useToast();
+  const { settings } = useUserSettings();
   
   const MIN_REPS = 5;
+
+  // Initialize minutes per rep from user settings
+  useEffect(() => {
+    if (settings?.minutes_per_exercise_rep) {
+      setMinutesPerRep(settings.minutes_per_exercise_rep);
+    }
+  }, [settings]);
 
   const handleStartExercise = (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -80,10 +92,59 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
     }
   };
   
-  const handleFinishWorkout = () => {
+  const handleFinishWorkout = async () => {
     if (currentReps >= MIN_REPS) {
       const finalTimeEarned = currentReps * minutesPerRep;
-      onComplete(finalTimeEarned);
+      
+      try {
+        // Get authenticated user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+          toast({
+            title: "Session not saved",
+            description: "Please sign in to save your exercise progress",
+            variant: "destructive"
+          });
+          onComplete(finalTimeEarned);
+          return;
+        }
+
+        // Save exercise session to database
+        const { error: insertError } = await supabase
+          .from('exercise_session')
+          .insert({
+            user_id: user.id,
+            exercise_type: selectedExercise?.name || 'Unknown',
+            reps_completed: currentReps,
+            time_earned: finalTimeEarned,
+            session_date: new Date().toISOString()
+          } as any);
+
+        if (insertError) {
+          console.error('Error saving exercise session:', insertError);
+          toast({
+            title: "Session not saved",
+            description: "Your time was earned but session wasn't saved to history",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Workout Complete! 🎉",
+            description: `You earned ${finalTimeEarned} minutes of screen time!`,
+          });
+        }
+
+        onComplete(finalTimeEarned);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast({
+          title: "Error",
+          description: "Something went wrong saving your workout",
+          variant: "destructive"
+        });
+        onComplete(finalTimeEarned);
+      }
     }
   };
   

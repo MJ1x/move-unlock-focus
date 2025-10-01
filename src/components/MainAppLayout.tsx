@@ -16,58 +16,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDailyReset } from "@/hooks/useDailyReset";
 
 interface MainAppLayoutProps {
-  earnedTime: number;
   selectedApps: string[];
   onStartExercise: () => void;
-  onTimeReset?: (newTime: number) => void;
 }
 
 export default function MainAppLayout({ 
-  earnedTime, 
   selectedApps, 
-  onStartExercise,
-  onTimeReset
+  onStartExercise
 }: MainAppLayoutProps) {
   const [activeTab, setActiveTab] = useState("home");
-  const [dailyGoal, setDailyGoal] = useState<number>(240); // Default 4 hours in minutes
-  
-  // Fetch user's daily goal from database
-  useEffect(() => {
-    const fetchDailyGoal = async () => {
-      try {
-        const { data: userSettings, error } = await supabase
-          .from('user_settings')
-          .select('daily_screen_time_limit')
-          .maybeSingle();
-          
-        if (error) {
-          console.log('No user settings found, using default');
-          return;
-        }
-        
-        if (userSettings?.daily_screen_time_limit) {
-          setDailyGoal(userSettings.daily_screen_time_limit);
-        }
-      } catch (error) {
-        console.error('Error fetching daily goal:', error);
-      }
-    };
-    
-    fetchDailyGoal();
-  }, []);
-  
-  // Handle daily reset
-  const handleDailyReset = () => {
-    // Reset available time to daily goal
-    onTimeReset?.(dailyGoal);
-    console.log('Daily reset performed - time reset to daily goal');
-  };
-  
-  // Use daily reset hook
-  const { timeUntilReset } = useDailyReset({
-    dailyGoal,
-    onReset: handleDailyReset
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,10 +33,8 @@ export default function MainAppLayout({
         <div className="flex-1 overflow-auto pb-20">
           <TabsContent value="home" className="m-0 h-full">
             <HomeScreen 
-              earnedTime={earnedTime}
               selectedApps={selectedApps}
               onStartExercise={onStartExercise}
-              dailyGoal={dailyGoal}
             />
           </TabsContent>
           

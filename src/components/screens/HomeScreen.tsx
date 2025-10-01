@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -11,78 +11,49 @@ import {
   Clock, 
   Flame,
   Trophy,
-  Lock,
-  Play
+  Lock
 } from "lucide-react";
+import { useCountdownTimer } from "@/hooks/useCountdownTimer";
+import { useDailyStats } from "@/hooks/useDailyStats";
+import { useUserSettings } from "@/hooks/useUserSettings";
 
 interface HomeScreenProps {
-  earnedTime: number;
   onStartExercise: () => void;
   selectedApps: string[];
-  dailyGoal?: number; // in minutes
-}
-
-interface DailyStats {
-  blockedTime: number;
-  exerciseTime: number;
-  repsCompleted: number;
-  streak: number;
+  onTimeEarned?: (minutes: number) => void;
 }
 
 export default function HomeScreen({ 
-  earnedTime, 
   onStartExercise, 
   selectedApps,
-  dailyGoal = 240 // Default 4 hours 
+  onTimeEarned
 }: HomeScreenProps) {
-  const [currentTime, setCurrentTime] = useState(earnedTime);
-  const [isTimerActive, setIsTimerActive] = useState(false);
+  const { settings, loading: settingsLoading } = useUserSettings();
+  const dailyGoal = settings?.daily_screen_time_limit || 60;
+  
+  const { remainingMinutes, formattedTime, isActive, toggleTimer } = useCountdownTimer(
+    dailyGoal,
+    onStartExercise
+  );
 
-  const dailyStats: DailyStats = {
-    blockedTime: 247, // minutes blocked today
-    exerciseTime: 18, // minutes exercised
-    repsCompleted: 47,
-    streak: 5
-  };
+  const { repsToday, exerciseTimeToday, dayStreak, timeUsed, loading: statsLoading } = useDailyStats(dailyGoal);
 
-  // Timer countdown
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isTimerActive && currentTime > 0) {
-      interval = setInterval(() => {
-        setCurrentTime(prev => {
-          if (prev <= 1) {
-            setIsTimerActive(false);
-            // When time expires, redirect to exercise challenge
-            onStartExercise();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 60000); // Count down every minute
-    }
-    
-    return () => clearInterval(interval);
-  }, [isTimerActive, currentTime, onStartExercise]);
-
-  const handleStartTimer = () => {
-    if (currentTime > 0) {
-      setIsTimerActive(true);
-    }
-  };
-
-  const handlePauseTimer = () => {
-    setIsTimerActive(false);
-  };
-
-  const formatTime = (minutes: number) => {
+  const formatMinutes = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  const timeProgress = (currentTime / (earnedTime || 1)) * 100;
+  if (settingsLoading || statsLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <Timer className="w-8 h-8 animate-pulse mx-auto text-primary" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -103,33 +74,31 @@ export default function HomeScreen({
             
             <div className="space-y-3">
               <div className="text-4xl font-bold text-primary">
-                {formatTime(Math.max(0, currentTime))}
+                {formattedTime}
               </div>
               
               <div className="text-sm text-muted-foreground">
-                Time remaining: {formatTime(Math.max(0, currentTime))} of {formatTime(dailyGoal)} daily goal
+                Time remaining of {formatMinutes(dailyGoal)} daily limit
               </div>
               
-              <Progress value={Math.max(0, (currentTime / dailyGoal) * 100)} className="h-2" />
+              <Progress value={Math.max(0, (remainingMinutes / dailyGoal) * 100)} className="h-2" />
               
-              {isTimerActive ? (
+              {remainingMinutes > 0 ? (
                 <div className="flex justify-center">
-                  <Button variant="secondary" onClick={handlePauseTimer}>
+                  <Button variant="secondary" onClick={toggleTimer} size="sm">
                     <Clock className="w-4 h-4 mr-2" />
-                    Pause Timer
+                    {isActive ? 'Pause Timer' : 'Resume Timer'}
                   </Button>
-                </div>
-              ) : currentTime > 0 ? (
-                <div className="text-center">
-                  <p className="text-sm text-success">
-                    📱 Apps are now accessible! Timer will start automatically when you use them.
-                  </p>
                 </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-3">
                     No time remaining. Exercise to unlock!
                   </p>
+                  <Button size="sm" onClick={onStartExercise} className="bg-gradient-energy">
+                    <Dumbbell className="w-4 h-4 mr-2" />
+                    Start Exercise
+                  </Button>
                 </div>
               )}
             </div>
@@ -141,15 +110,15 @@ export default function HomeScreen({
           <Card className="p-4 text-center">
             <div className="space-y-2">
               <Target className="w-6 h-6 text-warning mx-auto" />
-              <div className="text-2xl font-bold text-warning">{formatTime(dailyStats.blockedTime)}</div>
-              <p className="text-xs text-muted-foreground">Time Blocked</p>
+              <div className="text-2xl font-bold text-warning">{formatMinutes(timeUsed)}</div>
+              <p className="text-xs text-muted-foreground">Time Used</p>
             </div>
           </Card>
 
           <Card className="p-4 text-center">
             <div className="space-y-2">
               <Dumbbell className="w-6 h-6 text-success mx-auto" />
-              <div className="text-2xl font-bold text-success">{formatTime(dailyStats.exerciseTime)}</div>
+              <div className="text-2xl font-bold text-success">{formatMinutes(exerciseTimeToday)}</div>
               <p className="text-xs text-muted-foreground">Exercise Time</p>
             </div>
           </Card>
@@ -157,7 +126,7 @@ export default function HomeScreen({
           <Card className="p-4 text-center">
             <div className="space-y-2">
               <TrendingUp className="w-6 h-6 text-primary mx-auto" />
-              <div className="text-2xl font-bold text-primary">{dailyStats.repsCompleted}</div>
+              <div className="text-2xl font-bold text-primary">{repsToday}</div>
               <p className="text-xs text-muted-foreground">Reps Today</p>
             </div>
           </Card>
@@ -165,7 +134,7 @@ export default function HomeScreen({
           <Card className="p-4 text-center">
             <div className="space-y-2">
               <Flame className="w-6 h-6 text-energy mx-auto" />
-              <div className="text-2xl font-bold text-energy">{dailyStats.streak}</div>
+              <div className="text-2xl font-bold text-energy">{dayStreak}</div>
               <p className="text-xs text-muted-foreground">Day Streak</p>
             </div>
           </Card>
@@ -180,7 +149,7 @@ export default function HomeScreen({
             <div>
               <h3 className="font-semibold text-success">Fitness Rookie</h3>
               <p className="text-xs text-muted-foreground">Complete 50 total reps to unlock next badge</p>
-              <Progress value={(dailyStats.repsCompleted / 50) * 100} className="h-1 mt-2" />
+              <Progress value={(repsToday / 50) * 100} className="h-1 mt-2" />
             </div>
           </div>
         </Card>

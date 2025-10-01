@@ -12,13 +12,13 @@ import AppSelectionScreen from "@/components/AppSelectionScreen";
 import ExerciseScreen from "@/components/ExerciseScreen";
 import MainAppLayout from "@/components/MainAppLayout";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { addTimeToTimer } from "@/lib/timerUtils";
 
 type Screen = "launch" | "video" | "signup" | "pricing" | "goal-setting" | "reminder-frequency" | "exercise-rewards" | "welcome" | "app-selection" | "exercise" | "main-app";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("launch");
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
-  const [earnedTime, setEarnedTime] = useState(0);
   
   // Questionnaire state
   const [dailyLimit, setDailyLimit] = useState(180); // 3 hours default
@@ -110,12 +110,15 @@ const Index = () => {
   };
 
   const handleRepComplete = (timeEarned: number) => {
-    setEarnedTime(prevTime => prevTime + timeEarned); // Add to existing balance
-    setCurrentScreen("main-app"); // Return to dashboard after completing exercise
+    // Add earned time to the timer
+    addTimeToTimer(timeEarned);
+    // Return to dashboard
+    setCurrentScreen("main-app");
   };
   
   const handleTimeReset = (newTime: number) => {
-    setEarnedTime(newTime);
+    // Timer resets are now handled by the timer hook automatically at midnight
+    // This function is kept for compatibility but doesn't need to do anything
   };
 
   const handleBackFromApps = () => {
@@ -184,10 +187,8 @@ const Index = () => {
     case "main-app":
       return (
         <MainAppLayout 
-          earnedTime={earnedTime}
           selectedApps={selectedApps}
           onStartExercise={handleStartExercise}
-          onTimeReset={handleTimeReset}
         />
       );
     
