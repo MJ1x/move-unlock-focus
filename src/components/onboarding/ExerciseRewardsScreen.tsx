@@ -40,16 +40,22 @@ export default function ExerciseRewardsScreen({
     setIsLoading(true);
     
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      // Get current session to ensure user is authenticated
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (authError || !user) {
+      if (sessionError || !session) {
         toast({
-          title: "Authentication Error",
-          description: "Please try signing in again",
-          variant: "destructive",
+          title: "Authentication Required",
+          description: "Your session has expired. Preferences will be saved when you sign in.",
+          variant: "destructive"
         });
+        setIsLoading(false);
+        // Still allow proceeding to show the app
+        onContinue();
         return;
       }
+
+      const user = session.user;
 
       // Update user settings with all questionnaire data
       const { error } = await supabase

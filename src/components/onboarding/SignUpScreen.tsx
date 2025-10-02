@@ -58,7 +58,7 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
       const redirectUrl = `${window.location.origin}/`;
       const validData = validation.data;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: validData.email,
         password: validData.password,
         options: {
@@ -80,12 +80,23 @@ export default function SignUpScreen({ onContinue, onBack }: SignUpScreenProps) 
             variant: "destructive"
           });
         }
-      } else {
+        return;
+      }
+
+      // Check if session was established (email confirmation disabled)
+      if (data.session) {
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: "Welcome! Let's set up your preferences.",
         });
         onContinue();
+      } else {
+        // Email confirmation is required
+        toast({
+          title: "Verify your email",
+          description: "Please check your email and click the verification link to continue.",
+        });
+        // Don't proceed to questionnaire until email is verified
       }
     } catch (error) {
       toast({
