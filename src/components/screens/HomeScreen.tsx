@@ -56,120 +56,93 @@ export default function HomeScreen({
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-md mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Your Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Track your digital wellness journey</p>
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-lg mx-auto space-y-8">
+        {/* Minimal Header */}
+        <div className="text-center space-y-1">
+          <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Dashboard</h1>
         </div>
 
-        {/* Timer Section */}
-        <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary-glow/5 border-primary/20">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-2">
-              <Timer className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">Screen Time Today</h2>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="text-4xl font-bold text-primary">
+        {/* Hero Timer - Maximum Focus */}
+        <Card className="p-8 border-2 border-border">
+          <div className="text-center space-y-6">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Time Remaining
+              </div>
+              <div className="text-7xl font-bold tracking-tight text-foreground tabular-nums">
                 {formattedTime}
               </div>
-              
               <div className="text-sm text-muted-foreground">
-                Time remaining of {formatMinutes(dailyGoal)} daily limit
+                of {formatMinutes(dailyGoal)} daily limit
               </div>
-              
-              <Progress value={Math.max(0, (remainingMinutes / dailyGoal) * 100)} className="h-2" />
-              
-              {remainingMinutes > 0 ? (
-                <div className="flex justify-center">
-                  <Button variant="secondary" onClick={toggleTimer} size="sm">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {isActive ? 'Pause Timer' : 'Resume Timer'}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    No time remaining. Exercise to unlock!
-                  </p>
-                  <Button size="sm" onClick={onStartExercise} className="bg-gradient-energy">
-                    <Dumbbell className="w-4 h-4 mr-2" />
-                    Start Exercise
-                  </Button>
-                </div>
-              )}
             </div>
+            
+            <Progress value={Math.max(0, (remainingMinutes / dailyGoal) * 100)} className="h-1.5" />
+            
+            {remainingMinutes > 0 ? (
+              <Button variant="outline" onClick={toggleTimer} size="sm">
+                {isActive ? 'Pause' : 'Resume'}
+              </Button>
+            ) : (
+              <div className="space-y-3 pt-2">
+                <div className="w-12 h-12 mx-auto bg-muted rounded-full flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Time's up. Exercise to continue.
+                </p>
+                <Button onClick={onStartExercise} size="lg" className="w-full">
+                  <Dumbbell className="w-4 h-4 mr-2" />
+                  Start Exercise
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
 
-        {/* Daily Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 text-center">
+        {/* Minimalist Stats Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-5 border hover:border-primary/50 transition-colors">
             <div className="space-y-2">
-              <Target className="w-6 h-6 text-warning mx-auto" />
-              <div className="text-2xl font-bold text-warning">{formatMinutes(timeUsed)}</div>
-              <p className="text-xs text-muted-foreground">Time Used</p>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Used</div>
+              <div className="text-3xl font-bold tabular-nums">{formatMinutes(timeUsed)}</div>
             </div>
           </Card>
 
-          <Card className="p-4 text-center">
+          <Card className="p-5 border hover:border-primary/50 transition-colors">
             <div className="space-y-2">
-              <Dumbbell className="w-6 h-6 text-success mx-auto" />
-              <div className="text-2xl font-bold text-success">{formatMinutes(exerciseTimeToday)}</div>
-              <p className="text-xs text-muted-foreground">Exercise Time</p>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Earned</div>
+              <div className="text-3xl font-bold tabular-nums">{formatMinutes(exerciseTimeToday)}</div>
             </div>
           </Card>
 
-          <Card className="p-4 text-center">
+          <Card className="p-5 border hover:border-primary/50 transition-colors">
             <div className="space-y-2">
-              <TrendingUp className="w-6 h-6 text-primary mx-auto" />
-              <div className="text-2xl font-bold text-primary">{repsToday}</div>
-              <p className="text-xs text-muted-foreground">Reps Today</p>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Reps</div>
+              <div className="text-3xl font-bold tabular-nums">{repsToday}</div>
             </div>
           </Card>
 
-          <Card className="p-4 text-center">
+          <Card className="p-5 border hover:border-primary/50 transition-colors">
             <div className="space-y-2">
-              <Flame className="w-6 h-6 text-energy mx-auto" />
-              <div className="text-2xl font-bold text-energy">{dayStreak}</div>
-              <p className="text-xs text-muted-foreground">Day Streak</p>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Streak</div>
+              <div className="text-3xl font-bold tabular-nums">{dayStreak}</div>
             </div>
           </Card>
         </div>
 
-        {/* Achievement */}
-        <Card className="p-4 bg-gradient-to-r from-success/10 to-transparent border-success/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
-              <Trophy className="w-5 h-5 text-success" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-success">Fitness Rookie</h3>
-              <p className="text-xs text-muted-foreground">Complete 50 total reps to unlock next badge</p>
-              <Progress value={(repsToday / 50) * 100} className="h-1 mt-2" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Quick Actions */}
-        <div className="space-y-3">
+        {/* Clean CTA */}
+        {remainingMinutes > 0 && (
           <Button 
             onClick={onStartExercise}
-            className="w-full bg-gradient-energy text-energy-foreground hover:shadow-energy"
+            size="lg"
+            className="w-full"
           >
             <Dumbbell className="w-4 h-4 mr-2" />
             Earn More Time
           </Button>
-          
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">
-              Keep going! Every rep counts towards a healthier you 💪
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

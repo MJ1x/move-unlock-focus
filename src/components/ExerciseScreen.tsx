@@ -164,113 +164,98 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
 
   if (selectedExercise) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-lg mx-auto">
+          {/* Minimal Header */}
+          <div className="flex items-center gap-4 mb-8">
             <Button variant="ghost" size="icon" onClick={() => setSelectedExercise(null)}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <span className="text-2xl">{selectedExercise.icon}</span>
+              <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span className="text-lg">{selectedExercise.icon}</span>
                 {selectedExercise.name}
               </h1>
-              <p className="text-sm text-muted-foreground">{selectedExercise.description}</p>
             </div>
           </div>
 
-          {/* Earnings Rate Setting */}
-          <Card className="p-4 mb-6">
+          {/* Earnings Rate - Minimal */}
+          <Card className="p-5 mb-6 border">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Earning Rate</span>
-              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rate</span>
               <Select value={minutesPerRep.toString()} onValueChange={(value) => setMinutesPerRep(Number(value))}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28 h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 min/rep</SelectItem>
-                  <SelectItem value="2">2 min/rep</SelectItem>
-                  <SelectItem value="3">3 min/rep</SelectItem>
+                  <SelectItem value="1">1 min</SelectItem>
+                  <SelectItem value="2">2 min</SelectItem>
+                  <SelectItem value="3">3 min</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </Card>
 
-          {/* Progress Display */}
-          <Card className="p-6 mb-6 relative overflow-hidden">
+          {/* Clean Progress Display */}
+          <Card className="p-8 mb-6 relative overflow-hidden border-2">
             {showRepFeedback && (
-              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-pulse">
-                <div className="text-center">
-                  <CheckCircle className="w-8 h-8 text-primary mx-auto mb-1" />
-                  <p className="text-sm font-bold text-primary">Rep counted!</p>
-                </div>
+              <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
+                <CheckCircle className="w-12 h-12 text-primary animate-scale-in" />
               </div>
             )}
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className={`text-4xl font-bold ${currentReps >= MIN_REPS ? 'text-success' : 'text-muted-foreground'}`}>
+            <div className="space-y-6">
+              <div className="text-center space-y-2">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {currentReps >= MIN_REPS ? 'Time Earned' : 'Not Started'}
+                </div>
+                <div className={`text-6xl font-bold tabular-nums ${currentReps >= MIN_REPS ? 'text-primary' : 'text-muted-foreground'}`}>
                   {currentReps >= MIN_REPS ? totalTimeEarned : 0}
                 </div>
-                <p className="text-sm text-muted-foreground">Minutes Will Be Earned</p>
+                <p className="text-sm text-muted-foreground">minutes</p>
               </div>
               
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Reps completed:</span>
-                <span className="font-medium">
-                  {currentReps}/{MIN_REPS} minimum
+              <div className="flex items-center justify-between text-sm pt-4 border-t">
+                <span className="text-muted-foreground uppercase tracking-wider text-xs font-semibold">Reps</span>
+                <span className="font-bold text-lg tabular-nums">
+                  {currentReps}<span className="text-muted-foreground">/{MIN_REPS}</span>
                 </span>
               </div>
               
-              <div className="text-center">
-                {currentReps < MIN_REPS ? (
-                  <p className="text-sm text-warning animate-fade-in">
-                    Complete {MIN_REPS - currentReps} more reps to start earning time
-                  </p>
-                ) : (
-                  <div className="animate-scale-in">
-                    <p className="text-sm text-success font-medium">
-                      🎉 Minimum reached! Earning {minutesPerRep} minutes per rep
-                    </p>
-                  </div>
-                )}
-              </div>
+              {currentReps < MIN_REPS && (
+                <p className="text-xs text-center text-muted-foreground pt-2">
+                  {MIN_REPS - currentReps} more to start earning
+                </p>
+              )}
             </div>
           </Card>
 
-          {/* Camera Section */}
-          <Card className="p-6 mb-6">
+          {/* Minimal Camera Section */}
+          <Card className="p-6 mb-6 border-2">
             <div className="space-y-4">
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden border">
                 {cameraActive ? (
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center">
-                    <div className="text-center">
-                      <Camera className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="text-sm">Camera Active - AI Counting Reps</p>
-                      <div className="mt-4 flex justify-center">
-                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Tracking</p>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center">
-                    <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Camera will verify your reps</p>
+                    <Camera className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Camera Ready</p>
                   </div>
                 )}
               </div>
               
               <div className="flex gap-2">
                 {!isActive ? (
-                  <Button variant="success" onClick={handleStartCamera} className="flex-1">
+                  <Button onClick={handleStartCamera} className="flex-1" size="lg">
                     <Play className="w-4 h-4 mr-2" />
-                    Start Exercise
+                    Start
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => {setIsActive(false); setCameraActive(false);}} className="flex-1">
+                  <Button variant="outline" onClick={() => {setIsActive(false); setCameraActive(false);}} className="flex-1">
                     <Pause className="w-4 h-4 mr-2" />
                     Pause
                   </Button>
@@ -283,41 +268,40 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
             </div>
           </Card>
 
-          {/* Manual Counter and Actions */}
+          {/* Clean Manual Counter */}
           {isActive && (
-            <Card className="p-4">
-              <div className="text-center space-y-4">
-                <p className="text-sm text-muted-foreground">Demo: Tap to simulate AI detection</p>
+            <div className="space-y-3">
+              <Card className="p-5 border">
+                <p className="text-xs text-center text-muted-foreground uppercase tracking-wider mb-3">
+                  Demo Mode
+                </p>
                 <Button 
-                  variant="energy" 
                   size="lg"
                   onClick={handleRep}
                   className="w-full"
                 >
                   Count Rep {currentReps >= MIN_REPS && `(+${minutesPerRep} min)`}
                 </Button>
-                
-                <div className="flex gap-2">
-                  {currentReps < MIN_REPS ? (
-                    <Button 
-                      variant="outline" 
-                      onClick={handleCancelSession}
-                      className="w-full"
-                    >
-                      Cancel Session
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="success" 
-                      onClick={handleFinishWorkout}
-                      className="w-full animate-scale-in"
-                    >
-                      Finish Workout
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Card>
+              </Card>
+              
+              {currentReps < MIN_REPS ? (
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancelSession}
+                  className="w-full"
+                >
+                  Cancel
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleFinishWorkout}
+                  size="lg"
+                  className="w-full"
+                >
+                  Finish Workout
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -325,47 +309,42 @@ export default function ExerciseScreen({ onBack, onComplete }: ExerciseScreenPro
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-lg mx-auto">
+        {/* Minimal Header */}
+        <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Choose Exercise</h1>
-            <p className="text-sm text-muted-foreground">Start exercising to earn screen time instantly</p>
+            <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Choose Exercise</h1>
           </div>
         </div>
 
-        {/* Exercise Options */}
-        <div className="space-y-4">
+        {/* Clean Exercise Options */}
+        <div className="space-y-3">
           {exercises.map((exercise) => (
             <Card 
               key={exercise.id}
-              className="p-6 cursor-pointer hover:border-primary/50 transition-all duration-200"
+              className="p-6 cursor-pointer border-2 hover:border-primary transition-all duration-200"
               onClick={() => handleStartExercise(exercise)}
             >
               <div className="flex items-center gap-4">
-                <div className="text-4xl">{exercise.icon}</div>
+                <div className="text-3xl">{exercise.icon}</div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{exercise.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{exercise.description}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Coins className="w-3 h-3" />
-                    <span>Earn instantly per rep</span>
-                  </div>
+                  <p className="text-sm text-muted-foreground">{exercise.description}</p>
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
-        <Card className="mt-6 p-4 bg-primary/5 border-primary/20">
+        <Card className="mt-6 p-5 border">
           <div className="text-center">
-            <p className="text-sm font-medium text-primary">💡 Pro Tip</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Complete at least 5 reps to start earning screen time!
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Note</p>
+            <p className="text-sm text-foreground">
+              Complete at least 5 reps to start earning screen time
             </p>
           </div>
         </Card>
